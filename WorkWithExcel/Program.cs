@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using  WorkWithExcel.DLL;
 
 namespace WorkWithExcel
 {
@@ -15,7 +16,8 @@ namespace WorkWithExcel
             //string arguments = String.Join(" ", args);   
             //string source = args[0];
             //string source = args[1];            
-            string source = @"f:\Meta\Formats\";
+            const string source = @"f:\Meta\";
+            string[] masks = {".csv", ".ods", ".xls", ".xlsm" };
 
             try
             {
@@ -23,37 +25,28 @@ namespace WorkWithExcel
                 {
                     ExcelHelper.InitializeExcel();
                     string[] metas = Directory.GetFiles(source, "*", SearchOption.AllDirectories);
+                    int i = 1;                
                     foreach (string file in metas)
                     {
-                        ExcelHelper.ConvertToXlsx(file, Path.Combine(source, "xlsx"));
+                        ExcelHelper.ConvertToXlsx(file, masks, Path.Combine(source, "xlsx"));
+                        //Console.WriteLine("Обработано файлов: {0}", i);
+                        i++;
                     }
+                    Console.WriteLine("Дубликатов найдено: {0}", ExcelHelper.duplicateFiles);
                     Console.WriteLine("Конвертация завершена");
                     Console.ReadLine();
-                }                     
+                }
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null) ex = ex.InnerException;               
+                while (ex.InnerException != null) ex = ex.InnerException;
                 Console.WriteLine("Произошла ошибка: {0}", ex.Message);
                 Console.ReadLine();
             }
-
-
-            //MyApp = new Excel.Application {Visible = false};
-            //MyBook = MyApp.Workbooks.Open(DB_PATH);
-            //MyBook.SaveAs("f:\\Historical_data_test\\AP Invoice 15 КП 2.4 (29.6.2016)\\2.4\\", Excel.XlFileFormat.xlExcel12,
-            //System.Reflection.Missing.Value, System.Reflection.Missing.Value, false, false,
-            //Excel.XlSaveAsAccessMode.xlShared, false, false, System.Reflection.Missing.Value,
-            //System.Reflection.Missing.Value, System.Reflection.Missing.Value);
-
-            //excelWorkbook.SaveAs(strFullFilePathNoExt, Excel.XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
-            //Missing.Value, false, false, Excel.XlSaveAsAccessMode.xlNoChange,
-            //Excel.XlSaveConflictResolution.xlUserResolution, true,
-            //Missing.Value, Missing.Value, Missing.Value);
-
-            //MySheet = (Excel.Worksheet)MyBook.Sheets[1]; // Explicit cast is not required here
-            //lastRow = MySheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell).Row;
-
+            finally
+            {
+                ExcelHelper.CloseExcel();
+            }          
         }
 
         static void CopyFileByExtention(string filePath)
